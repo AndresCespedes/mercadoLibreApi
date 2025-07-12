@@ -48,7 +48,7 @@ product-api/
 
 1. Clonar el repositorio:
 ```bash
-git clone <[url-del-repositorio](https://github.com/AndresCespedes/mercadoLibreApi)>
+git clone https://github.com/AndresCespedes/mercadoLibreApi
 ```
 
 2. Navegar al directorio del proyecto:
