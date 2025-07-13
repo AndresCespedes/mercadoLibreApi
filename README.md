@@ -12,6 +12,7 @@ Este proyecto es una API REST que proporciona información detallada de producto
 - Lombok
 - Jackson
 - Apache JMeter
+- SLF4J con Logback
 
 ## Requisitos
 
@@ -26,20 +27,38 @@ product-api/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── com/mercadolibre/product_api/
-│   │   │       ├── controller/
-│   │   │       ├── dto/
-│   │   │       ├── exception/
-│   │   │       ├── model/
-│   │   │       ├── repository/
-│   │   │       ├── service/
+│   │   │       ├── config/             # Configuraciones de la aplicación
+│   │   │       │   ├── LoggingInterceptor.java
+│   │   │       │   └── WebConfig.java
+│   │   │       ├── controller/         # Controladores REST
+│   │   │       ├── dto/               # Objetos de transferencia de datos
+│   │   │       │   ├── CreateProductRequest.java
+│   │   │       │   ├── PagedResponse.java
+│   │   │       │   ├── ProductSearchParams.java
+│   │   │       │   └── UpdateProductRequest.java
+│   │   │       ├── exception/         # Manejo de excepciones
+│   │   │       ├── model/            # Entidades y modelos
+│   │   │       │   ├── Category.java
+│   │   │       │   ├── CreateProduct.java
+│   │   │       │   ├── ProductRating.java
+│   │   │       │   ├── Review.java
+│   │   │       │   └── Seller.java
+│   │   │       ├── repository/       # Capa de acceso a datos
+│   │   │       ├── service/         # Lógica de negocio
+│   │   │       ├── validation/      # Validadores personalizados
+│   │   │       │   ├── RatingValidator.java
+│   │   │       │   └── URLValidator.java
 │   │   │       └── ProductApiApplication.java
 │   │   └── resources/
-│   │       └── application.properties
+│   │       ├── application.properties
+│   │       └── logback-spring.xml    # Configuración de logging
 │   └── test/
 │       └── java/
 │           └── com/mercadolibre/product_api/
 │               ├── controller/
+│               ├── repository/
 │               ├── service/
+│               ├── validation/
 │               └── performance/
 └── pom.xml
 ```
@@ -66,13 +85,13 @@ cd product-api
 ./mvnw spring-boot:run
 ```
 
-La aplicación estará disponible en `http://localhost:8080`
+La aplicación estará disponible en `http://localhost:{el puerto que configures}`
 
 ## Documentación de la API
 
 La documentación de la API está disponible a través de Swagger UI:
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/api-docs`
+- Swagger UI: `http://localhost:{el puerto que configures}/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:{el puerto que configures}/api-docs`
 
 ## Endpoints
 
@@ -80,6 +99,9 @@ La documentación de la API está disponible a través de Swagger UI:
 
 - `GET /api/products/{id}`: Obtiene un producto por su ID
 - `GET /api/products`: Busca productos con filtros y paginación
+- `POST /api/products`: Crea un nuevo producto
+- `PUT /api/products/{id}`: Actualiza un producto existente
+- `DELETE /api/products/{id}`: Elimina un producto
 
 ### Parámetros de Búsqueda
 
@@ -101,6 +123,20 @@ GET /api/products?query=samsung&minPrice=400&maxPrice=1000&isOfficialStore=true&
 ## Almacenamiento de Datos
 
 Los datos se almacenan en un archivo JSON local (`products.json`) que se crea automáticamente en la raíz del proyecto.
+
+## Validaciones
+
+El proyecto incluye validadores personalizados para:
+- URLs de imágenes y sitios web
+- Calificaciones de productos (1-5 estrellas)
+- Datos de entrada mediante Jakarta Validation
+
+## Logging y Monitoreo
+
+- Logging detallado
+- Interceptor personalizado para logging de requests/responses
+- Configuración específica en `logback-spring.xml`
+- Los logs se almacenan en `logs/product-api.log`
 
 ## Tests
 
@@ -128,13 +164,17 @@ El reporte de cobertura estará disponible en `target/site/jacoco/index.html`
 
 - Documentación completa con OpenAPI/Swagger
 - Validación de datos con Jakarta Validation
-- Manejo global de excepciones
+- Manejo global de excepciones personalizado
 - CORS habilitado para todos los orígenes
 - Cobertura de código con JaCoCo
-- Logging con SLF4J
+- Logging
 - Paginación y filtros de búsqueda
 - Ordenamiento flexible
 - Pruebas de rendimiento con JMeter
+- Validadores personalizados
+- Interceptores para logging
+- DTOs para requests/responses
+- Manejo de errores consistente
 
 ## Documentación Técnica
 
