@@ -67,7 +67,7 @@ product-api/
 
 1. Clonar el repositorio:
 ```bash
-git clone <url-del-repositorio>
+git clone git clone <url-del-repositorio>
 ```
 
 2. Navegar al directorio del proyecto:
