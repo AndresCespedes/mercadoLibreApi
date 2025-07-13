@@ -1,11 +1,16 @@
+// Importamos las clases necesarias para el controlador
 package com.mercadolibre.product_api.controller;
 
+// Importamos los DTOs (Data Transfer Objects)
 import com.mercadolibre.product_api.dto.CreateProductRequest;
 import com.mercadolibre.product_api.dto.PagedResponse;
 import com.mercadolibre.product_api.dto.ProductSearchParams;
 import com.mercadolibre.product_api.dto.UpdateProductRequest;
+// Importamos el modelo de producto
 import com.mercadolibre.product_api.model.CreateProduct;
+// Importamos el servicio que maneja la lógica de negocio
 import com.mercadolibre.product_api.service.ProductService;
+// Importamos anotaciones de OpenAPI/Swagger para documentación
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,24 +18,43 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+// Importamos anotaciones de validación
 import jakarta.validation.Valid;
+// Importamos Lombok para reducir código boilerplate
 import lombok.RequiredArgsConstructor;
+// Importamos clases de Spring para manejo de HTTP y paginación
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+// Importamos clases de utilidad
 import java.math.BigDecimal;
 import java.net.URI;
 
-@RestController
-@RequestMapping("/api/products")
-@RequiredArgsConstructor
-@Tag(name = "Productos", description = "API para gestionar productos de Mercado Libre")
-@CrossOrigin(origins = "*")
+/**
+ * Controlador REST que maneja las operaciones CRUD y búsqueda de productos.
+ * Implementa la capa de presentación de la API.
+ */
+@RestController // Indica que es un controlador REST
+@RequestMapping("/api/products") // Define la ruta base para todos los endpoints
+@RequiredArgsConstructor // Genera constructor con campos final (inyección de dependencias)
+@Tag(name = "Productos", description = "API para gestionar productos de Mercado Libre") // Añade una etiqueta a la API (swagger)
+@CrossOrigin(origins = "*") // Permite peticiones CORS desde cualquier origen
 public class ProductController {
     
+    // Inyectamos el servicio de productos
     private final ProductService productService;
     
+    /**
+     * Obtiene un producto por su ID.
+     * 
+     * @param id ID único del producto a buscar
+     * @return ResponseEntity con el producto si existe
+     * @throws ProductNotFoundException si el producto no existe
+     */
     @GetMapping("/{id}")
     @Operation(
         summary = "Obtener un producto por ID",
@@ -41,8 +65,8 @@ public class ProductController {
             responseCode = "200",
             description = "Producto encontrado exitosamente",
             content = @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = CreateProduct.class)
+                mediaType = MediaType.APPLICATION_JSON_VALUE, // Tipo de media (JSON)
+                schema = @Schema(implementation = CreateProduct.class) // Esquema de la respuesta (CreateProduct)
             )
         ),
         @ApiResponse(
@@ -52,12 +76,19 @@ public class ProductController {
         )
     })
     public ResponseEntity<CreateProduct> getProductById(
-        @Parameter(description = "ID único del producto", required = true)
-        @PathVariable String id
+        @Parameter(description = "ID único del producto", required = true) // Documenta el parámetro y lo marca como requerido
+        @PathVariable String id // Captura el ID de la URL
     ) {
+        // Delegamos la búsqueda al servicio y retornamos respuesta HTTP 200 si existe
         return ResponseEntity.ok(productService.getProductById(id));
     }
     
+    /**
+     * Crea un nuevo producto.
+     * 
+     * @param request DTO con los datos del nuevo producto
+     * @return ResponseEntity con el producto creado
+     */
     @PostMapping
     @Operation(
         summary = "Crear un nuevo producto",
@@ -79,14 +110,24 @@ public class ProductController {
         )
     })
     public ResponseEntity<CreateProduct> createProduct(
-        @Parameter(description = "Datos del nuevo producto", required = true)
-        @Valid @RequestBody CreateProductRequest request
+        @Parameter(description = "Datos del nuevo producto", required = true) 
+        @Valid @RequestBody CreateProductRequest request // Valida y mapea el cuerpo de la petición
     ) {
+        // Creamos el producto a través del servicio
         CreateProduct createdProduct = productService.createProduct(request);
-        return ResponseEntity.created(URI.create("/api/products/" + createdProduct.getId()))
+        // Retornamos respuesta HTTP 201 con la ubicación del nuevo recurso
+        return ResponseEntity.created(URI.create("/api/products/" + createdProduct.getId())) // Retorna la ubicación del nuevo recurso
                 .body(createdProduct);
     }
     
+    /**
+     * Actualiza un producto existente.
+     * 
+     * @param id ID del producto a actualizar
+     * @param request DTO con los datos a actualizar
+     * @return ResponseEntity con el producto actualizado
+     * @throws ProductNotFoundException si el producto no existe
+     */
     @PutMapping("/{id}")
     @Operation(
         summary = "Actualizar un producto existente",
@@ -113,14 +154,22 @@ public class ProductController {
         )
     })
     public ResponseEntity<CreateProduct> updateProduct(
-        @Parameter(description = "ID del producto a actualizar", required = true)
-        @PathVariable String id,
-        @Parameter(description = "Datos actualizados del producto", required = true)
-        @Valid @RequestBody UpdateProductRequest request
+        @Parameter(description = "ID del producto a actualizar", required = true) // Documenta el parámetro y lo marca como requerido
+        @PathVariable String id, // Captura el ID de la URL
+        @Parameter(description = "Datos actualizados del producto", required = true) // Documenta el parámetro y lo marca como requerido    
+        @Valid @RequestBody UpdateProductRequest request // Valida y mapea el cuerpo de la petición
     ) {
+        // Actualizamos el producto a través del servicio y retornamos respuesta HTTP 200
         return ResponseEntity.ok(productService.updateProduct(id, request));
     }
     
+    /**
+     * Elimina un producto existente.
+     * 
+     * @param id ID del producto a eliminar
+     * @return ResponseEntity sin contenido
+     * @throws ProductNotFoundException si el producto no existe
+     */
     @DeleteMapping("/{id}")
     @Operation(
         summary = "Eliminar un producto",
@@ -139,12 +188,23 @@ public class ProductController {
     })
     public ResponseEntity<Void> deleteProduct(
         @Parameter(description = "ID del producto a eliminar", required = true)
-        @PathVariable String id
+        @PathVariable String id // Captura el ID de la URL
     ) {
+        // Eliminamos el producto a través del servicio
         productService.deleteProduct(id);
+        // Retornamos respuesta HTTP 204 (Sin contenido)
         return ResponseEntity.noContent().build();
     }
     
+    /**
+     * Lista todos los productos con paginación y ordenamiento.
+     * 
+     * @param page Número de página (desde 0)
+     * @param size Tamaño de página
+     * @param sortBy Campo para ordenar
+     * @param sortDirection Dirección del ordenamiento
+     * @return ResponseEntity con la lista paginada de productos
+     */
     @GetMapping
     @Operation(
         summary = "Listar todos los productos",
@@ -156,33 +216,30 @@ public class ProductController {
             description = "Productos encontrados exitosamente",
             content = @Content(
                 mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = PagedResponse.class)
+                schema = @Schema(implementation = Page.class)
             )
         )
     })
-    public ResponseEntity<PagedResponse<CreateProduct>> getAllProducts(
-        @Parameter(description = "Número de página (desde 0)")
-        @RequestParam(defaultValue = "0") Integer page,
-        
-        @Parameter(description = "Tamaño de página (cantidad de elementos)")
-        @RequestParam(defaultValue = "10") Integer size,
-        
-        @Parameter(description = "Campo para ordenar (id, price, rating)")
-        @RequestParam(defaultValue = "id") String sortBy,
-        
-        @Parameter(description = "Dirección del ordenamiento (asc, desc)")
-        @RequestParam(defaultValue = "asc") String sortDirection
+    public ResponseEntity<Page<CreateProduct>> getAllProducts(
+        @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        ProductSearchParams searchParams = ProductSearchParams.builder()
-                .page(page)
-                .size(size)
-                .sortBy(sortBy)
-                .sortDirection(sortDirection)
-                .build();
-        
-        return ResponseEntity.ok(productService.searchProducts(searchParams));
+        return ResponseEntity.ok(productService.getAllProducts(pageable));
     }
     
+    /**
+     * Busca productos aplicando filtros, paginación y ordenamiento.
+     * 
+     * @param query Término de búsqueda
+     * @param minPrice Precio mínimo
+     * @param maxPrice Precio máximo
+     * @param isOfficialStore Filtro de tienda oficial
+     * @param minRating Calificación mínima
+     * @param page Número de página
+     * @param size Tamaño de página
+     * @param sortBy Campo para ordenar
+     * @param sortDirection Dirección del ordenamiento
+     * @return ResponseEntity con la lista filtrada y paginada de productos
+     */
     @GetMapping("/search")
     @Operation(
         summary = "Buscar productos con filtros y paginación",
@@ -194,11 +251,11 @@ public class ProductController {
             description = "Búsqueda realizada exitosamente",
             content = @Content(
                 mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = PagedResponse.class)
+                schema = @Schema(implementation = Page.class)
             )
         )
     })
-    public ResponseEntity<PagedResponse<CreateProduct>> searchProducts(
+    public ResponseEntity<Page<CreateProduct>> searchProducts(
         @Parameter(description = "Término de búsqueda en título y descripción")
         @RequestParam(required = false) String query,
         
@@ -214,17 +271,7 @@ public class ProductController {
         @Parameter(description = "Calificación mínima del producto")
         @RequestParam(required = false) Double minRating,
         
-        @Parameter(description = "Número de página (desde 0)")
-        @RequestParam(defaultValue = "0") Integer page,
-        
-        @Parameter(description = "Tamaño de página (cantidad de elementos)")
-        @RequestParam(defaultValue = "10") Integer size,
-        
-        @Parameter(description = "Campo para ordenar (id, price, rating)")
-        @RequestParam(defaultValue = "id") String sortBy,
-        
-        @Parameter(description = "Dirección del ordenamiento (asc, desc)")
-        @RequestParam(defaultValue = "asc") String sortDirection
+        @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
         ProductSearchParams searchParams = ProductSearchParams.builder()
                 .query(query)
@@ -232,12 +279,8 @@ public class ProductController {
                 .maxPrice(maxPrice)
                 .isOfficialStore(isOfficialStore)
                 .minRating(minRating)
-                .page(page)
-                .size(size)
-                .sortBy(sortBy)
-                .sortDirection(sortDirection)
                 .build();
         
-        return ResponseEntity.ok(productService.searchProducts(searchParams));
+        return ResponseEntity.ok(productService.searchProducts(searchParams, pageable));
     }
 } 
