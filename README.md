@@ -67,7 +67,7 @@ product-api/
 
 1. Clonar el repositorio:
 ```bash
-git clone https://github.com/AndresCespedes/mercadoLibreApi
+git clone <url-del-repositorio>
 ```
 
 2. Navegar al directorio del proyecto:
@@ -154,11 +154,6 @@ Los resultados de las pruebas de rendimiento se guardan en:
 - Plan de pruebas: `target/jmeter/testplan.jmx`
 - Resultados: `target/jmeter/results_[timestamp].jtl`
 
-### Cobertura de Código
-```bash
-./mvnw verify
-```
-El reporte de cobertura estará disponible en `target/site/jacoco/index.html`
 
 ## Características
 
