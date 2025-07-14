@@ -23,6 +23,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
@@ -74,17 +77,10 @@ class ProductControllerTest {
                 CreateProduct.builder().id("MLB7654321").title("Product 2").build()
         );
 
-        PagedResponse<CreateProduct> pagedResponse = PagedResponse.<CreateProduct>builder()
-                .content(products)
-                .pageNumber(0)
-                .pageSize(10)
-                .totalElements(2)
-                .totalPages(1)
-                .first(true)
-                .last(true)
-                .build();
+        Page<CreateProduct> pagedResponse = new PageImpl<>(products);
 
-        when(productService.searchProducts(any(ProductSearchParams.class))).thenReturn(pagedResponse);
+        when(productService.searchProducts(any(ProductSearchParams.class), any(Pageable.class)))
+                .thenReturn(pagedResponse);
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
@@ -92,13 +88,13 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].id", is("MLB1234567")))
                 .andExpect(jsonPath("$.content[1].id", is("MLB7654321")))
-                .andExpect(jsonPath("$.pageNumber", is(0)))
-                .andExpect(jsonPath("$.pageSize", is(10)))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.size", is(10)))
                 .andExpect(jsonPath("$.totalElements", is(2)))
                 .andExpect(jsonPath("$.first", is(true)))
                 .andExpect(jsonPath("$.last", is(true)));
 
-        verify(productService).searchProducts(any(ProductSearchParams.class));
+        verify(productService).searchProducts(any(ProductSearchParams.class), any(Pageable.class));
     }
 
     @Test
@@ -111,17 +107,10 @@ class ProductControllerTest {
                 .build()
         );
 
-        PagedResponse<CreateProduct> response = PagedResponse.<CreateProduct>builder()
-                .content(filteredProducts)
-                .pageNumber(0)
-                .pageSize(10)
-                .totalElements(1)
-                .totalPages(1)
-                .first(true)
-                .last(true)
-                .build();
+        Page<CreateProduct> response = new PageImpl<>(filteredProducts);
 
-        when(productService.searchProducts(any(ProductSearchParams.class))).thenReturn(response);
+        when(productService.searchProducts(any(ProductSearchParams.class), any(Pageable.class)))
+                .thenReturn(response);
 
         mockMvc.perform(get("/api/products/search")
                 .param("query", "iPhone")
@@ -131,15 +120,14 @@ class ProductControllerTest {
                 .param("minRating", "4.0")
                 .param("page", "0")
                 .param("size", "10")
-                .param("sortBy", "price")
-                .param("sortDirection", "desc"))
+                .param("sort", "price,desc"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content[0].title", is("iPhone")))
-                .andExpect(jsonPath("$.pageNumber", is(0)))
+                .andExpect(jsonPath("$.number", is(0)))
                 .andExpect(jsonPath("$.totalElements", is(1)));
 
-        verify(productService).searchProducts(any(ProductSearchParams.class));
+        verify(productService).searchProducts(any(ProductSearchParams.class), any(Pageable.class));
     }
 
     @Test
@@ -155,30 +143,22 @@ class ProductControllerTest {
                 .build()
         );
 
-        PagedResponse<CreateProduct> response = PagedResponse.<CreateProduct>builder()
-                .content(products)
-                .pageNumber(0)
-                .pageSize(2)
-                .totalElements(2)
-                .totalPages(1)
-                .first(true)
-                .last(true)
-                .build();
+        Page<CreateProduct> response = new PageImpl<>(products);
 
-        when(productService.searchProducts(any(ProductSearchParams.class))).thenReturn(response);
+        when(productService.searchProducts(any(ProductSearchParams.class), any(Pageable.class)))
+                .thenReturn(response);
 
         mockMvc.perform(get("/api/products")
                 .param("page", "0")
                 .param("size", "2")
-                .param("sortBy", "id")
-                .param("sortDirection", "asc"))
+                .param("sort", "id,asc"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].title", is("Product 1")))
                 .andExpect(jsonPath("$.content[1].title", is("Product 2")));
 
-        verify(productService).searchProducts(any(ProductSearchParams.class));
+        verify(productService).searchProducts(any(ProductSearchParams.class), any(Pageable.class));
     }
 
     @Test

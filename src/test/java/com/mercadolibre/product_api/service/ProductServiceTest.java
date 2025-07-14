@@ -21,6 +21,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import com.mercadolibre.product_api.dto.CreateProductRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -78,13 +82,14 @@ class ProductServiceTest {
     void searchProducts_WithDefaultParams_ReturnsAllProducts() {
         when(productRepository.findAll()).thenReturn(testProducts);
 
-        ProductSearchParams params = ProductSearchParams.getDefaultParams();
-        PagedResponse<CreateProduct> result = productService.searchProducts(params);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
+        ProductSearchParams params = ProductSearchParams.builder().build();
+        Page<CreateProduct> result = productService.searchProducts(params, pageable);
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
-        assertEquals(0, result.getPageNumber());
-        assertEquals(10, result.getPageSize());
+        assertEquals(0, result.getNumber());
+        assertEquals(10, result.getSize());
         assertTrue(result.isFirst());
         verify(productRepository).findAll();
     }
@@ -93,13 +98,12 @@ class ProductServiceTest {
     void searchProducts_WithPriceFilter_ReturnsFilteredProducts() {
         when(productRepository.findAll()).thenReturn(testProducts);
 
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
         ProductSearchParams params = ProductSearchParams.builder()
                 .minPrice(new BigDecimal("150.00"))
-                .page(0)
-                .size(10)
                 .build();
 
-        PagedResponse<CreateProduct> result = productService.searchProducts(params);
+        Page<CreateProduct> result = productService.searchProducts(params, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
@@ -111,13 +115,12 @@ class ProductServiceTest {
     void searchProducts_WithSearchQuery_ReturnsMatchingProducts() {
         when(productRepository.findAll()).thenReturn(testProducts);
 
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
         ProductSearchParams params = ProductSearchParams.builder()
                 .query("Another")
-                .page(0)
-                .size(10)
                 .build();
 
-        PagedResponse<CreateProduct> result = productService.searchProducts(params);
+        Page<CreateProduct> result = productService.searchProducts(params, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
