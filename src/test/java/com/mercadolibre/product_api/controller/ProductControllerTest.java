@@ -180,7 +180,7 @@ class ProductControllerTest {
                     "price": 150.00
                 }""";
 
-        mockMvc.perform(put("/api/products/MLB1234567")
+        mockMvc.perform(patch("/api/products/MLB1234567")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
@@ -203,7 +203,7 @@ class ProductControllerTest {
                     "title": "Updated Product"
                 }""";
 
-        mockMvc.perform(put("/api/products/nonexistent")
+        mockMvc.perform(patch("/api/products/nonexistent")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isNotFound())
@@ -221,7 +221,7 @@ class ProductControllerTest {
                     "price": -100.00
                 }""";
 
-        mockMvc.perform(put("/api/products/MLB1234567")
+        mockMvc.perform(patch("/api/products/MLB1234567")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())

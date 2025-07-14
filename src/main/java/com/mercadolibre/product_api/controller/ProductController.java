@@ -121,17 +121,17 @@ public class ProductController {
     }
     
     /**
-     * Actualiza un producto existente.
+     * Actualiza parcialmente un producto existente.
      * 
      * @param id ID del producto a actualizar
      * @param request DTO con los datos a actualizar
      * @return ResponseEntity con el producto actualizado
      * @throws ProductNotFoundException si el producto no existe
      */
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @Operation(
-        summary = "Actualizar un producto existente",
-        description = "Actualiza los campos especificados de un producto existente. Todos los campos son opcionales."
+        summary = "Actualizar parcialmente un producto existente",
+        description = "Actualiza solo los campos especificados de un producto existente. Todos los campos son opcionales."
     )
     @ApiResponses({
         @ApiResponse(
@@ -154,12 +154,11 @@ public class ProductController {
         )
     })
     public ResponseEntity<CreateProduct> updateProduct(
-        @Parameter(description = "ID del producto a actualizar", required = true) // Documenta el parámetro y lo marca como requerido
-        @PathVariable String id, // Captura el ID de la URL
-        @Parameter(description = "Datos actualizados del producto", required = true) // Documenta el parámetro y lo marca como requerido    
-        @Valid @RequestBody UpdateProductRequest request // Valida y mapea el cuerpo de la petición
+        @Parameter(description = "ID del producto a actualizar", required = true)
+        @PathVariable String id,
+        @Parameter(description = "Datos actualizados del producto", required = true)    
+        @Valid @RequestBody UpdateProductRequest request
     ) {
-        // Actualizamos el producto a través del servicio y retornamos respuesta HTTP 200
         return ResponseEntity.ok(productService.updateProduct(id, request));
     }
     
