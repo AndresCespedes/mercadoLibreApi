@@ -12,7 +12,6 @@ Este proyecto es una API REST que proporciona información detallada de producto
 - Lombok
 - Jackson
 - Apache JMeter
-- SLF4J con Logback
 
 ## Requisitos
 
