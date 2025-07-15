@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import com.mercadolibre.product_api.model.Seller;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -125,6 +126,46 @@ class ProductServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("MLB7654321", result.getContent().get(0).getId());
+        verify(productRepository).findAll();
+    }
+
+    @Test
+    void searchProducts_WithStoreName_ReturnsMatchingProducts() {
+        // Configuramos el vendedor del producto
+        Seller seller1 = Seller.builder()
+                .id("SELLER1")
+                .storeName("Tienda Electrónica")
+                .isOfficialStore(true)
+                .build();
+        
+        Seller seller2 = Seller.builder()
+                .id("SELLER2")
+                .storeName("Tienda de Ropa")
+                .isOfficialStore(false)
+                .build();
+
+        // Configuramos los productos con sus respectivos vendedores
+        testProduct.setSeller(seller1);
+        CreateProduct anotherProduct = CreateProduct.builder()
+                .id("MLB7654321")
+                .title("Another Product")
+                .description("Another Description")
+                .price(new BigDecimal("200.00"))
+                .seller(seller2)
+                .build();
+
+        when(productRepository.findAll()).thenReturn(Arrays.asList(testProduct, anotherProduct));
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
+        ProductSearchParams params = ProductSearchParams.builder()
+                .storeName("Electrónica")
+                .build();
+
+        Page<CreateProduct> result = productService.searchProducts(params, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("Tienda Electrónica", result.getContent().get(0).getSeller().getStoreName());
         verify(productRepository).findAll();
     }
 

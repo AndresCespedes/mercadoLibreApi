@@ -242,8 +242,8 @@ public class ProductService {
             // Filtramos por término de búsqueda en título y descripción
             boolean matchesQuery = params.getQuery() == null ||
                     product.getTitle().toLowerCase().contains(params.getQuery().toLowerCase()) ||
-                    product.getDescription().toLowerCase()
-                            .contains(params.getQuery().toLowerCase());
+                    (product.getDescription() != null && 
+                    product.getDescription().toLowerCase().contains(params.getQuery().toLowerCase()));
 
             // Filtramos por precio mínimo
             boolean matchesMinPrice = params.getMinPrice() == null ||
@@ -255,16 +255,24 @@ public class ProductService {
 
             // Filtramos por tienda oficial
             boolean matchesOfficialStore = params.getIsOfficialStore() == null ||
-                    product.getSeller().getIsOfficialStore().equals(params.getIsOfficialStore());
+                    (product.getSeller() != null && 
+                    product.getSeller().getIsOfficialStore() == params.getIsOfficialStore());
 
             // Filtramos por calificación mínima
             boolean matchesMinRating = params.getMinRating() == null ||
-                    (product.getRating() != null &&
-                            product.getRating().getAverageRating() >= params.getMinRating());
+                    (product.getRating() != null && 
+                    product.getRating().getAverageRating() >= params.getMinRating());
 
-            // Combinamos todos los filtros con AND
+            // Filtramos por nombre de tienda
+            boolean matchesStoreName = params.getStoreName() == null ||
+                    (product.getSeller() != null && 
+                    product.getSeller().getStoreName() != null &&
+                    product.getSeller().getStoreName().toLowerCase()
+                            .contains(params.getStoreName().toLowerCase()));
+
+            // Combinamos todos los filtros
             return matchesQuery && matchesMinPrice && matchesMaxPrice &&
-                    matchesOfficialStore && matchesMinRating;
+                    matchesOfficialStore && matchesMinRating && matchesStoreName;
         };
     }
 

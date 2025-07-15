@@ -269,6 +269,9 @@ public class ProductController {
         
         @Parameter(description = "Calificación mínima del producto")
         @RequestParam(required = false) Double minRating,
+
+        @Parameter(description = "Nombre de la tienda para filtrar")
+        @RequestParam(required = false) String storeName,
         
         @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
@@ -278,6 +281,7 @@ public class ProductController {
                 .maxPrice(maxPrice)
                 .isOfficialStore(isOfficialStore)
                 .minRating(minRating)
+                .storeName(storeName)
                 .build();
         
         return ResponseEntity.ok(productService.searchProducts(searchParams, pageable));
